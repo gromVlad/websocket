@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './App.module.css';
+import { io } from 'socket.io-client';
 
 const App = () => {
+
+  useEffect(()=> {
+    const socket = io();
+  },[])
+
   const [messages, setMessages] = useState([
     { message: 'hello', id: "21564", user: { id: '35462', name: "Vlad" } },
     { message: 'hello world', id: "36562", user: { id: '83169', name: "Alex" } }
