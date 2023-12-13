@@ -1,18 +1,21 @@
-import express from "express";
-import { createServer } from "node:http";
+import { log } from "console";
+import express from "express"
+import http from "http";
 import { Server } from "socket.io";
 
-const PORT = process.env.PORT || 4000
+const PORT = process.env.PORT || 3001;
 
 const app = express();
-const server = createServer(app);
+
+const server = http.createServer(app);
 const io = new Server(server);
 
 app.get("/", (req, res) => {
-  res.send("<h1>Hello world</h1>");
+  res.send("<h1>Hello<h1/>");
 });
 
-io.on("connection", (socket) => {
+io.on("connect", (socket) => {
+  debugger
   console.log("a user connected");
 });
 
