@@ -1,26 +1,29 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import styles from './App.module.css';
 
-function App() {
+const App = () => {
+  const [messages, setMessages] = useState([
+    { message: 'hello', id: "21564", user: { id: '35462', name: "Vlad" } },
+    { message: 'hello world', id: "36562", user: { id: '83169', name: "Alex" } }
+  ]);
+
+  const sendMessage = () => {
+    // Логика для отправки сообщения
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={styles.container}>
+      {messages.map((m) => (
+        <div key={m.id} className={styles.messageContainer}>
+          <span className={styles.username}>{m.user.name}:</span> {m.message}
+        </div>
+      ))}
+      <textarea className={styles.textarea}></textarea>
+      <button className={styles.button} onClick={sendMessage}>
+        Send
+      </button>
     </div>
   );
-}
+};
 
 export default App;
