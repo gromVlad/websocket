@@ -1,11 +1,10 @@
-import { AppRoutes } from "./AppRoutes"
+import React from "react";
+import AppRoutes from "./AppRoutes";
 
-export const App = () => {
-  return (
-    <>
-      <div className="container" >
-        <AppRoutes />
-      </div>
-    </>
-  )
-}
+const App = () => (
+  <div className="container">
+    <AppRoutes />
+  </div>
+);
+
+export default App;

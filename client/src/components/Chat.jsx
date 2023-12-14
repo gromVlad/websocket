@@ -1,70 +1,124 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import React from "react";
 import io from "socket.io-client";
-import styles from "../styles/Chat.module.css";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import EmojiPicker from "emoji-picker-react";
 
-export const Chat = () => {
-  const { search } = useLocation(); //?name=xczxc&room=zxczczc
-  const [params, setParams] = useState(null);
-  const [socket, setSocket] = useState(null);
+import icon from "../images/emoji.svg";
+import styles from "../styles/Chat.module.css";
+import Messages from "./Messages";
+
+const socket = io.connect("http://localhost:5000");
+
+const Chat = () => {
+  const { search } = useLocation();
+  const navigate = useNavigate();
+  const [params, setParams] = useState({ room: "", user: "" });
   const [state, setState] = useState([]);
+  const [message, setMessage] = useState("");
+  const [isOpen, setOpen] = useState(false);
+  const [users, setUsers] = useState(0);
+  const [roomUsers, setRoomUsers] = useState([]);
 
   useEffect(() => {
     const searchParams = Object.fromEntries(new URLSearchParams(search));
-
-    setParams(searchParams); //{name: 'vxvxvx', room: 'vxvxvxv'}
+    setParams(searchParams);
+    socket.emit("join", searchParams);
   }, [search]);
 
   useEffect(() => {
-    if (params) {
-      const socket = io.connect("http://localhost:5000");
-
-      setSocket(socket);
-
-      socket.emit("join", params);
-    }
-  }, [params]);
+    socket.on("message", ({ data }) => {
+      setState((_state) => [..._state, data]);
+    });
+  }, []);
 
   useEffect(() => {
-    if (socket) {
-      socket.on("message", (data) => {
-        setState((_state) => [..._state,data])
+    socket.on("room", ({ data: { users } }) => {
+      setUsers(users.length);
+      console.log(users);
+      setRoomUsers((_state) => {
+        const uniqueUsers = [...new Set(users.map((el) => el.name))];
+        return [...uniqueUsers];
       });
-    }
-  }, [socket]);
+    });
+  }, [roomUsers]);
 
-  console.log(state);
+  const leftRoom = () => {
+    socket.emit("leftRoom", { params });
+    navigate("/");
+  };
 
-  const handleLeftRoom = () => {
+  const handleChange = ({ target: { value } }) => setMessage(value);
 
-  }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!message) return;
+
+    socket.emit("sendMessage", { message, params });
+
+    setMessage("");
+  };
+
+  const onEmojiClick = ({ emoji }) => setMessage(`${message} ${emoji}`);
 
   return (
-    <div className={styles.wrap}>
-      <div className={styles.header}>
-        <div className={styles.title}>{params.room}</div>
-        <div className={styles.users}> 0 users</div>
-        <button className={styles.leftRoom} onClick={handleLeftRoom}></button>
+    <div className={styles.chatContainer}>
+      <div className={styles.userList}>
+        <h2>Users in the room {users}:</h2>
+        <ul className={styles.userListContainer}>
+          {roomUsers.map((user, i) => (
+            <li key={i}>{user}</li>
+          ))}
+        </ul>
       </div>
-      <div className={styles.messages}>
-        {state.map((mes) => {
-          return <span>{mes}</span>;
-        })}
-      </div>
-      <form className={styles.form}>
-        <div className={styles.input}>
-          <input
-            type="text"
-            name="message"
-            value={values[USERNAME]}
-            className={styles.input}
-            onChange={handleChange}
-            autoComplete="off"
-            placeholder="me"
-            required
-          />
+
+      <div className={styles.chatWrapper}>
+        <div className={styles.header}>
+          <div className={styles.title}>{params.room}</div>
+          <button className={styles.left} onClick={leftRoom}>
+            leave chat
+          </button>
         </div>
-      </form>
+
+        <div className={styles.messages}>
+          <Messages messages={state} name={params.name} />
+        </div>
+
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.input}>
+            <input
+              type="text"
+              name="message"
+              placeholder="message..."
+              value={message}
+              onChange={handleChange}
+              autoComplete="off"
+              required
+            />
+          </div>
+          <div className={styles.emoji}>
+            <img src={icon} alt="" onClick={() => setOpen(!isOpen)} />
+
+            {isOpen && (
+              <div className={styles.emojies}>
+                <EmojiPicker onEmojiClick={onEmojiClick} />
+              </div>
+            )}
+          </div>
+
+          <div className={styles.button}>
+            <input
+              type="submit"
+              onSubmit={handleSubmit}
+              value="Send a message"
+            />
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
+
+export default Chat;
