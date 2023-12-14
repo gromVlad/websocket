@@ -4,8 +4,11 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const app = express();
 
+
 const route = require("./route");
 const { addUser, findUser, getRoomUsers, removeUser } = require("./users");
+
+const port = process.env.PORT || 5000
 
 app.use(cors({ origin: "*" }));
 app.use(route);
@@ -71,6 +74,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => {
+server.listen(port, () => {
   console.log("Server is running");
 });
