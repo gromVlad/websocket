@@ -61,7 +61,10 @@ const Chat = () => {
     setMessage("");
   };
 
-  const onEmojiClick = ({ emoji }) => setMessage(`${message} ${emoji}`);
+  const onEmojiClick = ({ emoji }) => {
+    setMessage(`${message} ${emoji}`)
+    setOpen(!isOpen);
+  };
 
   return (
     <div className={styles.chatContainer}>
